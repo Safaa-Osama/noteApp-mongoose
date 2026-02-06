@@ -10,7 +10,8 @@ export const signUp = async (req, res, next) => {
     if (await db_service.findOne(
         { model: userModel, filter: { email } }
     )) {
-        return res.status(409).json({ message: "user already exist" })
+        // return res.status(409).json({ message: "user already exist" })
+        throw new Error("user already exist")
     }
 
     const user = await db_service.create({
@@ -23,11 +24,11 @@ export const signUp = async (req, res, next) => {
 
 export const signIn = async (req, res, next) => {
     const { email, password } = req.body;
+    console.log(req.body);
     const user = await db_service.findOne(
         { model: userModel, filter: { email, provider: providerEnum.system } }
     )
-
-    if (password !== user.password && email !== user.email) {
+    if (password !== user.password) {
         // return res.status(400).json({ message: "Invalid enail or password" })
         next(new Error("Invalid enail or password"))
     }

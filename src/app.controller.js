@@ -1,10 +1,9 @@
 import express from 'express';
 import { testDBConnection } from './DB/connection.js';
 import { userRouter } from './modules/user/user.controller.js';
-import CS from "./config/config.service.js";
+import {port} from "../config/config.service.js";
 
 const app = express();
-const port = CS.port;
 
  const bootstrap = () => {
 
@@ -24,9 +23,7 @@ const port = CS.port;
 
     
     app.use('{/*demo}', (req, res, next) => {
-        res.status(404).json({
-            message: `URL "${req.originalUrl}" NOT FOUND`
-        });
+      throw new Error(`URL "${req.originalUrl}" NOT FOUND`)
     });
 
     app.use((err, req, res, next) => {
@@ -36,7 +33,7 @@ const port = CS.port;
         });
     });
 
-    app.listen(port, () =>
+    app.listen(3000, () =>
         console.log(`Your app listening at ${port}`)
     );
 };
