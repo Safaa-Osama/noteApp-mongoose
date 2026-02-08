@@ -2,8 +2,10 @@ import express from 'express';
 import { testDBConnection } from './DB/connection.js';
 import { userRouter } from './modules/user/user.controller.js';
 import {port} from "../config/config.service.js";
+import { noteRouter } from './modules/note/note.controller.js';
 
 const app = express();
+const portNum = parseInt(port);
 
  const bootstrap = () => {
 
@@ -20,6 +22,8 @@ const app = express();
     testDBConnection();
 
     app.use('/users', userRouter);
+    app.use('/notes', noteRouter);
+
 
     
     app.use('{/*demo}', (req, res, next) => {
@@ -33,7 +37,7 @@ const app = express();
         });
     });
 
-    app.listen(3000, () =>
+    app.listen(portNum, () =>
         console.log(`Your app listening at ${port}`)
     );
 };
