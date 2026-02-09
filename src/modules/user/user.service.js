@@ -25,8 +25,9 @@ export const signUp = async (req, res, next) => {
 
 export const signIn = async (req, res, next) => {
     const { email, password } = req.body;
-    const user = await db_service.findOne(
-        { model: userModel, filter: { email, provider: providerEnum.system } }
+    const user = await db_service.findOne( {
+         model: userModel,
+          filter: { email, provider: providerEnum.system } }
     )
     if (password !== user.password) {
         // return res.status(400).json({ message: "Invalid enail or password" })
