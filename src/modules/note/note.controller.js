@@ -5,6 +5,10 @@ export const noteRouter = Router();
 
 noteRouter.get("/",NS.getAllNotes);
 noteRouter.get("/content",NS.getuserNotes);
+noteRouter.get("/aggregate-note",NS.aggregateNote);
+noteRouter.get("/paginate-sort",NS.getPaginatedNotes);
+noteRouter.get("/:id", NS.noteById);
+
 
 noteRouter.post('/add-note', NS.addNote);
 
