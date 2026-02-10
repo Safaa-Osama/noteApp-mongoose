@@ -29,9 +29,11 @@ export const signIn = async (req, res, next) => {
          model: userModel,
           filter: { email, provider: providerEnum.system } }
     )
-    if (password !== user.password) {
-        // return res.status(400).json({ message: "Invalid enail or password" })
-        next(new Error("Invalid enail or password"))
+    if (!user) {
+       return next(new Error("user not exist")) 
+    }
+    if (password !== user.password ) {
+      return next(new Error("Invalid password"))
     }
     const token = await jwt.sign({
         id: user._id,
