@@ -2,9 +2,8 @@ import { providerEnum } from "../../common/enum/user.enum.js";
 import { userModel } from "../../DB/models/user.model.js";
 import * as db_service from "../../DB/database.services.js";
 import jwt from "jsonwebtoken";
+import { secretKey } from "../../../config/config.service.js";
 
-
-const secretKey = process.env.secretKey;
 
 export const signUp = async (req, res, next) => {
     const { firstName, lastName, email, phone, password, age, provider } = req.body;
@@ -25,15 +24,16 @@ export const signUp = async (req, res, next) => {
 
 export const signIn = async (req, res, next) => {
     const { email, password } = req.body;
-    const user = await db_service.findOne( {
-         model: userModel,
-          filter: { email, provider: providerEnum.system } }
+    const user = await db_service.findOne({
+        model: userModel,
+        filter: { email, provider: providerEnum.system }
+    }
     )
     if (!user) {
-       return next(new Error("user not exist")) 
+        return next(new Error("user not exist"))
     }
-    if (password !== user.password ) {
-      return next(new Error("Invalid password"))
+    if (password !== user.password) {
+        return next(new Error("Invalid password"))
     }
     const token = await jwt.sign({
         id: user._id,
@@ -56,16 +56,8 @@ export const getAllUsers = async (req, res, next) => {
 }
 
 export const getById = async (req, res, next) => {
-    const authorization = req.headers.authorization;
-
-    if (!authorization) {
-        next(new Error("token not valid"))
-    }
-
-    const token = authorization.split(" ")[1];
-    const decoded = jwt.verify(token, secretKey);
-
-    const user = await userModel.findById(decoded.id);
+    const id = req.decoded.id;
+    const user = await userModel.findById(id);
 
     if (!user) {
         return next(new Error("User not found"))
@@ -76,19 +68,9 @@ export const getById = async (req, res, next) => {
 
 export const updateEmail = async (req, res, next) => {
 
-    const authorization = req.headers.authorization;
     const { email, age } = req.body;
-
-    if (!authorization) {
-        return res.status(401).json({ message: " invalid Token" });
-    }
-
-    const token = authorization.split(" ")[1];
-
-
-    const decoded = jwt.verify(token, secretKey);
-
-    const user = await userModel.findById(decoded.id);
+    const id = req.decoded.id
+    const user = await userModel.findById(id);
 
     if (!user) {
         return next(new Error("User not found"))
@@ -111,23 +93,9 @@ export const updateEmail = async (req, res, next) => {
 
 export const deleteUser = async (req, res, next) => {
 
-    const authorization = req.headers.authorization;
-    // const {email} = req.body
-    //  if (email && email !== user.email) {
-
-    //     if (await db_service.findOne({ model: userModel, filter: { email } })) {
-    //         return next(new Error("Email not exists"));
-    //     }
-    // }
-
-    if (!authorization) {
-        return res.status(401).json({ message: " invalid Token" });
-    }
-
-    const token = authorization.split(" ")[1];
-    const decoded = jwt.verify(token, secretKey);
-
-    const user = await userModel.findById(decoded.id);
+    const id = req.decoded.id;
+console.log(id)
+    const user = await userModel.findById(id);
 
     if (!user) {
         return next(new Error("User not found"));
@@ -135,7 +103,7 @@ export const deleteUser = async (req, res, next) => {
 
     const deletedUser = await db_service.deleteOne({
         model: userModel,
-        filter: { _id: user._id }
+        filter: { id: user._id }
     });
 
     return res.status(200).json({ message: "User deleted successfully", deletedUser });

@@ -25,6 +25,11 @@ export const updateMany = async ({ model, filter = {}, update = {}, options = {}
 export const deleteOne = async ({ model, filter = {} } = {}) => {
     return await model.deleteOne(filter);
 }
+
+export const findOneSelect = async ({model, filter={}, fields={}})=>{
+    return await model.find({filter}).select({fields})
+}
+
 export const deleteMany = async ({ model, filter = {} } = {}) => {
     return await model.deleteMany(filter);
 }

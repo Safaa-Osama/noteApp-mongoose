@@ -1,22 +1,12 @@
 import mongoose from "mongoose";
 import * as db_services from "../../DB/database.services.js"
 import { noteModel } from "../../DB/models/note.model.js";
-import jwt from "jsonwebtoken";
 
-const secretKey = process.env.secretKey;
 
 //--1--
 export const addNote = async (req, res, next) => {
-    const authorization = req.headers.authorization
-    if (!authorization) {
-        return next(new Error("userToken not valid"))
-    }
-    const token = authorization.split(" ")[1];
 
-
-    const decoded = jwt.verify(token, secretKey);
-    const userId = decoded.id
-        ;
+    const userId = req.decoded.id
     const { title, content } = req.body;
 
     const note = await db_services.create({
@@ -28,21 +18,13 @@ export const addNote = async (req, res, next) => {
 //--2--
 export const updateNote = async (req, res, next) => {
     const { noteId } = req.params;
-
-    const authorization = req.headers.authorization;
-    if (!authorization) {
-        return next(new Error("userToken not valid"));
-    }
-
-    const token = authorization.split(" ")[1];
-    const decoded = jwt.verify(token, secretKey);
-    const userId = decoded.id;
+    const userId = req.decoded.id;
 
     const { title, content } = req.body;
 
     const updatedNote = await db_services.updateOne({
         model: noteModel,
-        filter: { _id: noteId, userId: userId },
+        filter: { _id: noteId, userId },
         update: { title, content }
     });
 
@@ -55,20 +37,12 @@ export const updateNote = async (req, res, next) => {
 //--4--
 export const updateManyNotes = async (req, res, next) => {
 
-    const authorization = req.headers.authorization;
-    if (!authorization) {
-        return next(new Error("userToken not valid"));
-    }
-
-    const token = authorization.split(" ")[1];
-    const decoded = jwt.verify(token, secretKey);
-    const userId = decoded.id;
-
     const { title } = req.body;
     if (!title) {
         return next(new Error("Title is required"));
     }
 
+    userId = req.decoded.id;
     const result = await db_services.updateMany({
         model: noteModel,
         filter: { userId },
@@ -81,19 +55,11 @@ export const updateManyNotes = async (req, res, next) => {
 export const replaceNote = async (req, res, next) => {
     const { noteId } = req.params;
     const { title, content } = req.body;
-
-    const authorization = req.headers.authorization;
-    if (!authorization) {
-        return next(new Error("userToken not valid"));
-    }
-
-    const token = authorization.split(" ")[1];
-    const decoded = jwt.verify(token, secretKey);
-    const userId = decoded.id;
+    const userId = req.decoded.id;
 
     const newNote = await db_services.replaceOne({
         model: noteModel,
-        filter: { _id: noteId, userId: userId },
+        filter: { _id: noteId, userId },
         replacement: { title, content, userId },
     });
     if (newNote.matchedCount === 0) {
@@ -109,14 +75,7 @@ export const getAllNotes = async (req, res, next) => {
 //--8--
 export const getuserNotes = async (req, res, next) => {
 
-    const authorization = req.headers.authorization;
-    if (!authorization) {
-        return next(new Error("userToken not valid"));
-    }
-
-    const token = authorization.split(" ")[1];
-    const decoded = jwt.verify(token, secretKey);
-    const userId = decoded.id;
+    const userId = req.decoded.id;
 
     const { content } = req.query;
     if (!content) {
@@ -136,21 +95,11 @@ export const getuserNotes = async (req, res, next) => {
 //--5--
 export const deleteNote = async (req, res, next) => {
     const { noteId } = req.params;
-
-    const authorization = req.headers.authorization;
-    if (!authorization) {
-        return next(new Error("userToken not valid"));
-    }
-
-    const token = authorization.split(" ")[1];
-    const decoded = jwt.verify(token, secretKey);
-    const userId = decoded.id;
-
+    const userId = req.decoded.id;
 
     const deletedNote = await db_services.deleteOne({
         model: noteModel,
-        filter: { _id: noteId, userId: userId },
-
+        filter: { _id: noteId, userId },
     });
 
     if (!deletedNote) {
@@ -161,21 +110,11 @@ export const deleteNote = async (req, res, next) => {
 };
 //--11--
 export const deleteAll = async (req, res, next) => {
-
-    const authorization = req.headers.authorization;
-    if (!authorization) {
-        return next(new Error("userToken not valid"));
-    }
-
-    const token = authorization.split(" ")[1];
-    const decoded = jwt.verify(token, secretKey);
-    const userId = decoded.id;
-
+    const userId = req.decoded.id;
 
     const result = await db_services.deleteMany({
         model: noteModel,
         filter: { userId },
-
     });
 
     if (!result) {
@@ -184,19 +123,9 @@ export const deleteAll = async (req, res, next) => {
 
     return res.status(200).json({ message: " deleted", result });
 }
-
-
-
 //--6--
 export const getPaginatedNotes = async (req, res, next) => {
-    const authorization = req.headers.authorization;
-    if (!authorization) {
-        return next(new Error("invalid token"))
-    }
-
-    const token = authorization.split(" ")[1];
-    const decode = jwt.verify(token, secretKey);
-    const userId = decode.id;
+    const userId = req.decoded.id;
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -220,34 +149,17 @@ export const getPaginatedNotes = async (req, res, next) => {
 }
 //--9--
 export const noteById = async (req, res, next) => {
-    const authorization = req.headers.authorization;
-    if (!authorization) {
-        return next(new Error("invalid token"))
-    }
-
-    const token = authorization.split(" ")[1];
-    const decode = jwt.verify(token, secretKey);
-    const userId = decode.id;
+    const userId = req.decoded.id;
 
     const notes = await db_services.find({
         model: noteModel,
         filter: { userId }
     })
-
-
     return res.status(200).json({ messsage: "done", notes })
 }
 //--10--
 export const aggregateNote = async (req, res, next) => {
-
-    const authorization = req.headers.authorization;
-    if (!authorization) {
-        return next(new Error("userToken not valid"));
-    }
-
-    const token = authorization.split(" ")[1];
-    const decoded = jwt.verify(token, secretKey);
-    const userId = decoded.id;
+    const userId = req.decoded.id;
 
     const { title } = req.query;
     if (!title) {
